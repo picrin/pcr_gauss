@@ -1,33 +1,31 @@
+from __future__ import print_function
 import numpy
 import math
 import random
-import matplotlib.pyplot as plt
+import csv
+#import matplotlib.pyplot as plt
 from sklearn import mixture
 
-# generate a gaussian
-def gaussian(x, amp, cen, wid):
-    return amp * math.exp(-(x - cen) ** 2 / wid)
+import csv
 
-# the height of peaks of read 1 and read 2
-read1 = 12
-read2 = 20
+x = []
+y = []
 
-# that's our x data, i.e. reference
-x = range(1, 101)
-
-# that's our y data, i.e. reads
-y = [int(round(gaussian(i, 20000, read1, 0.5) + gaussian(i, 20000, read2, 10) + random.gauss(200, 90))) for i in x]
-
-# that's our data printed in pairs (x_i, y_i)
-print([z for z in zip(x, y)])
+with open(sys.argv[1], 'rb') as csvfile:
+    spamreader = csv.reader(csvfile, delimiter='\t')
+    for i, row in enumerate(spamreader):
+        if i != 0:
+            x.append(int(row[0].split("_")[-1]))
+            y.append(int(row[2]))
 
 # you have to set this manually to weed out all the noise. Every bit of noise should be below it.
-threshold = 1000
+threshold = 0
+rightLimit = 200
 
 # unravelling histogram into samples.
 samples = []
 for no, value in enumerate([int(round(i)) for i in y]):
-    if value > threshold:
+    if value > threshold and no < rightLimit:
         for _ in range(value):
             samples.append(no)
 
@@ -52,11 +50,13 @@ weights = gmm2.weights_
 
 plt.bar(x, y)
 
-print("means")
-print(means)
-print("roundErr")
-print(roundErr)
-print("weights")
-print(weights)
-
 plt.show()
+
+#plt.savefig("adams_tool.png")
+
+with open("adam_tool_data", "w") as f:
+    print(means, file=f)
+    print("roundErr", file=f)
+    print(roundErr, file=f)
+    print("weights", file=f)
+    print(weights, file=f)
